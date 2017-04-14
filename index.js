@@ -28,24 +28,24 @@ var DisplayObject = {
   }
 }
 
-function Container(x, y, image) {
-  var container = new PIXI.Container()
-  container.x = x
-  container.y = y
+function Hop(x, y, image) {
+  var hop = new PIXI.Container()
+  hop.x = x
+  hop.y = y
 
   if (image !== undefined) {
     var sprite = PIXI.Sprite.fromImage(image);
     sprite.scale.x = 0.2
     sprite.scale.y = 0.2
-    container.addChild(sprite)  
+    hop.addChild(sprite)
   }
 
-  this.pixiDisplay = container;
+  this.pixiDisplay = hop;
 }
 
-Container.prototype = DisplayObject;
+Hop.prototype = DisplayObject;
 
-Container.prototype.addChildren = function(children) {
+Hop.prototype.addChildren = function(children) {
   for (var i = 0; i< children.length; i++) {
     var child = children[i].pixiDisplay
     this.pixiDisplay.addChild(children[i].pixiDisplay);
@@ -62,43 +62,43 @@ document.addEventListener("DOMContentLoaded", function(event) {
   }
 
 
-  function createContainersWithImages(amount) {
-    var containers = []
+  function createHopsWithImages(amount) {
+    var hops = []
     for (var i = 0; i < amount; i++) {
       var min = 30
       var max = 100
-      var container = new Container(myRandom(min, max), myRandom(min, max), "icon.png")
-      container.rotate(app, 0.1)
-      containers.push(container)
+      var hop = new Hop(myRandom(min, max), myRandom(min, max), "icon.png")
+      hop.rotate(app, 0.1)
+      hops.push(hop)
     }
-    return containers
+    return hops
   }
 
-  function createContainers(amount, delta) {
-    var containers = []
+  function createHops(amount, delta) {
+    var hops = []
     for (var i = 0; i < amount; i++) {
       var min = 30
       var max = 100
-      var container = new Container(myRandom(min, max), myRandom(min, max))
-      container.addChildren(createContainersWithImages(7))
-      container.rotate(app, -0.1)
-      container.pulse(app)
-      containers.push(container)
+      var hop = new Hop(myRandom(min, max), myRandom(min, max))
+      hop.addChildren(createHopsWithImages(7))
+      hop.rotate(app, -0.1)
+      hop.pulse(app)
+      hops.push(hop)
     }
-    return containers;
+    return hops;
   }
 
-  function containerOfContainers(x, y, amount, delta) {
-    var container = new Container(x, y)
-    container.addChildren(createContainers(amount, delta))
-    return container
+  function hopOfHops(x, y, amount, delta) {
+    var hop = new Hop(x, y)
+    hop.addChildren(createHops(amount, delta))
+    return hop
   }
 
-  var container1 = new containerOfContainers(0, 0, 5, -0.1);
-  var container2 = new containerOfContainers(100, 100, 4, -0.1);
-  var container3 = new containerOfContainers(50, 240, 4, -0.1);
-  var parent = new Container(300, 300);
-  parent.addChildren([container1, container2, container3])
+  var hop1 = new hopOfHops(0, 0, 5, -0.1);
+  var hop2 = new hopOfHops(100, 100, 4, -0.1);
+  var hop3 = new hopOfHops(50, 240, 4, -0.1);
+  var parent = new Hop(300, 300);
+  parent.addChildren([hop1, hop2, hop3])
   parent.pulse(app)
   app.stage.addChild(parent.pixiDisplay);
 
