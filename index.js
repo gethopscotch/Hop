@@ -1,65 +1,54 @@
 var DisplayObject = {
   rotate: function(app, rotationSpeed) {
-      var that = this
+    var that = this
     // Listen for rotate update
-        app.ticker.add(function(delta) {
-          // just for fun, let's rotate mr rabbit a little
-          // delta is 1 if running at 100% performance
-          // creates frame-independent tranformation
+    app.ticker.add(function(delta) {
+      // just for fun, let's rotate mr rabbit a little
+      // delta is 1 if running at 100% performance
+      // creates frame-independent tranformation
 
-          that.pixiDisplay.rotation += rotationSpeed * delta;
-        });
+      that.pixiDisplay.rotation += rotationSpeed * delta;
+    });
   },
   pulse: function(app) {
     var that = this
-      if (that.sign === undefined || that.sign == undefined) {
+    if (that.sign === undefined || that.sign == undefined) {
+      that.sign = 1
+    }
+    // Listen for rotate update
+    app.ticker.add(function(delta) {
+      if (that.pixiDisplay.scale.x > 2) {
+        that.sign = -1
+      } else if (that.pixiDisplay.scale.x < 0) {
         that.sign = 1
       }
-  // Listen for rotate update
-      app.ticker.add(function(delta) {
-        if (that.pixiDisplay.scale.x > 2) {
-          that.sign = -1
-        } else if (that.pixiDisplay.scale.x < 0) {
-          that.sign = 1
-        }
-        that.pixiDisplay.scale.x += 0.01 * delta * that.sign;
-        that.pixiDisplay.scale.y = that.pixiDisplay.scale.x
-      });
+      that.pixiDisplay.scale.x += 0.01 * delta * that.sign;
+      that.pixiDisplay.scale.y = that.pixiDisplay.scale.x
+    });
   }
 }
-function Sprite(x, y) {
 
-  // create a new Sprite from an image path
-  var icon = PIXI.Sprite.fromImage('icon.png')
+function Container(x, y, image) {
+  var container = new PIXI.Container()
+  container.x = x
+  container.y = y
 
-  // center the sprite's anchor point
-  icon.anchor.set(0.5);
+  if (image !== undefined) {
+    var sprite = PIXI.Sprite.fromImage(image);
+    sprite.scale.x = 0.2
+    sprite.scale.y = 0.2
+    container.addChild(sprite)  
+  }
 
-  // move the sprite to the center of the screen
-  icon.x = x
-  icon.y = y
-  icon.scale.x = 0.2
-  icon.scale.y = 0.2
-
-  this.pixiDisplay = icon;
-}
-
-Sprite.prototype = DisplayObject;
-
-function Container(x, y) {
-    var container = new PIXI.Container()
-    container.x = x
-    container.y = y
-
-    this.pixiDisplay = container;
+  this.pixiDisplay = container;
 }
 
 Container.prototype = DisplayObject;
 
-Container.prototype.addChildren = function(sprites) {
-  for (var i = 0; i< sprites.length; i++) {
-    var child = sprites[i].pixiDisplay
-    this.pixiDisplay.addChild(sprites[i].pixiDisplay);
+Container.prototype.addChildren = function(children) {
+  for (var i = 0; i< children.length; i++) {
+    var child = children[i].pixiDisplay
+    this.pixiDisplay.addChild(children[i].pixiDisplay);
   }
 }
 
@@ -73,16 +62,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
   }
 
 
-  function createSprites(amount) {
-    var sprites = []
+  function createContainersWithImages(amount) {
+    var containers = []
     for (var i = 0; i < amount; i++) {
       var min = 30
       var max = 100
-      var sprite = new Sprite(myRandom(min, max), myRandom(min, max))
-      sprite.rotate(app, 0.1)
-      sprites.push(sprite)
+      var container = new Container(myRandom(min, max), myRandom(min, max), "icon.png")
+      container.rotate(app, 0.1)
+      containers.push(container)
     }
-    return sprites
+    return containers
   }
 
   function createContainers(amount, delta) {
@@ -91,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
       var min = 30
       var max = 100
       var container = new Container(myRandom(min, max), myRandom(min, max))
-      container.addChildren(createSprites(3))
+      container.addChildren(createContainersWithImages(7))
       container.rotate(app, -0.1)
       container.pulse(app)
       containers.push(container)
