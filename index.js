@@ -34,11 +34,11 @@ var DisplayObject = {
   }
 }
 
-function Hop(x, y, image) {
+function ImageHop(x, y, image) {
   var hop = new PIXI.Container()
   hop.x = x
   hop.y = y
-  this.childHops = []
+  this.childImageHops = []
   if (image !== undefined) {
     var sprite = PIXI.Sprite.fromImage(image);
     sprite.scale.x = 0.2
@@ -50,22 +50,22 @@ function Hop(x, y, image) {
 
 }
 
-Hop.prototype = DisplayObject;
+ImageHop.prototype = DisplayObject;
 
-Hop.prototype.addChildren = function(children) {
+ImageHop.prototype.addChildren = function(children) {
   for (var i = 0; i< children.length; i++) {
-    this.addHop(children[i])
+    this.addImageHop(children[i])
   }
 }
 
-Hop.prototype.addHop = function(hop) {
+ImageHop.prototype.addImageHop = function(hop) {
   this.pixiDisplay.addChild(hop.pixiDisplay);
-  this.childHops.push(hop)
+  this.childImageHops.push(hop)
 };
 
-Hop.prototype.addNewHop = function(x, y, image) {
-  var hop = new Hop(x, y, image);
-  this.addHop(hop)
+ImageHop.prototype.addNewImageHop = function(x, y, image) {
+  var hop = new ImageHop(x, y, image);
+  this.addImageHop(hop)
   return hop
 }
 
@@ -75,13 +75,13 @@ function myRandom(min, max) {
 var app = new PIXI.Application(800, 600, {backgroundColor : 0x1099bb});
 DisplayObject.app = app
 
-function addHop(hop) {
+function addImageHop(hop) {
   app.stage.addChild(hop.pixiDisplay);
 }
 
-function newHop(x, y, image) {
-  var hop = new Hop(x, y, image);
-  addHop(hop)
+function newImageHop(x, y, image) {
+  var hop = new ImageHop(x, y, image);
+  addImageHop(hop)
   return hop
 }
 
