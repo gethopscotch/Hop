@@ -1,30 +1,29 @@
-
 var app = new PIXI.Application(800, 600, {backgroundColor : 0x1099bb});
 
 var hero = new PIXI.Graphics()
-hero.ay = 0
-hero.vy = 0
+hero.accelerationY = 0
+hero.velocityY = 0
 var enemy = new PIXI.Graphics()
-enemy.vx = -5
+enemy.velocityX = -5
 
 var exportProps = function() {
   return {
     x: this.x,
     y: this.y,
-    vx: this.vx,
-    vy: this.vy,
+    velocityX: this.velocityX,
+    velocityY: this.velocityY,
     ax: this.ax,
-    ay: this.ay
+    accelerationY: this.accelerationY
   }
 }
 
 var loadProps = function(props) {
   this.x = props.x
   this.y = props.y
-  this.vx = props.vx
-  this.vy = props.vy
+  this.velocityX = props.velocityX
+  this.velocityY = props.velocityY
   this.ax = props.ax
-  this.ay = props.ay
+  this.accelerationY = props.accelerationY
 }
 
 hero.exportProps = exportProps
@@ -49,7 +48,7 @@ var onStart = function() {
   enemy.beginFill(0xF6A623, 1.0)
   enemy.drawCircle(30, 60, 30)
   enemy.endFill()
-  enemy.x = 400
+  enemy.x = 800
   enemy.y = hero.y
   app.stage.addChild(enemy)
 }
@@ -76,11 +75,36 @@ var enemyStates = []
 var heroStates = []
 var index = 0
 
+function updateDisplay(enemy, hero) {
+  message = ""
+
+  console.log(index)
+  for (var i = enemyStates.length - 1; i >= 0; i--) {
+    if (i == (index - 1)) {
+      message += "<div id='activestate' style='background:red'>"
+    }
+    message += i + 1 + ") enemy: " + JSON.stringify(enemyStates[i]) 
+    message += "<br /> hero: " + JSON.stringify(heroStates[i])
+    message += "<hr>"
+    if (i == index - 1) {
+      message += "</div>"
+    }
+  }
+
+
+  document.getElementById('messages').innerHTML = message
+}
+
 function onTick(forward, update) {
   if (!update && !shouldTick) {
     return
   }
+  updateDisplay(enemy, hero)
 
+  var activeState = document.getElementById("activestate")
+  if (activeState) {
+    activeState.scrollIntoView(false)
+  }
   var shouldMoveForward = (index >= enemyStates.length - 1 && forward)
   if (update && !shouldMoveForward) {
     if (!forward) {
@@ -98,28 +122,28 @@ function onTick(forward, update) {
     enemy.loadProps(enemyStates[index])
     hero.loadProps(heroStates[index])
   } else {
-  
-    enemy.x += enemy.vx
-    if (enemy.x < 0) {
-      enemy.x = 800 + Math.floor(Math.random() * 400)
-    }
-    hero.vy = hero.vy + hero.ay
-    hero.y += hero.vy
-    if(hero.y == 400) {
-      hero.ay = 0
-      hero.vy = 0
-    } else if (hero.y >= 400) {
-      hero.ay = 0
-      hero.vy = 0
-      hero.y = 400
-    } else {
-      hero.ay = 0.98
-    }
     enemyStates = enemyStates.slice(0, index)
     heroStates = heroStates.slice(0, index)
     index += 1
     enemyStates.append(enemy.exportProps())
     heroStates.append(hero.exportProps())
+    enemy.x += enemy.velocityX
+
+    if (enemy.x < 0) {
+      enemy.x = 800 + Math.floor(Math.random() * 400)
+    }
+    hero.velocityY = hero.velocityY + hero.accelerationY
+    hero.y += hero.velocityY
+    if(hero.y == 400) {
+      hero.accelerationY = 0
+      hero.velocityY = 0
+    } else if (hero.y >= 400) {
+      hero.accelerationY = 0
+      hero.velocityY = 0
+      hero.y = 400
+    } else {
+      hero.accelerationY = 0.98
+    }
   }
 
   if (boxesIntersect(hero, enemy)) {
@@ -128,11 +152,11 @@ function onTick(forward, update) {
     hero.tint = 0x50E3C2
   }
 
-  // document.getElementById('messages').innerHTML = "enemy: " + JSON.stringify(enemy.exportProps()) + "<br /> hero: " + JSON.stringify(hero.exportProps())
   if (update) {
     app.ticker.update()
   }
 }
+
 
 var shouldTick = true
 function togglePlay(event) {
@@ -151,7 +175,7 @@ function togglePlay(event) {
 
 
 document.addEventListener("DOMContentLoaded", function(event) {
-  document.body.appendChild(app.view);
+  document.getElementById('pixicanvas').appendChild(app.view);
 
   var playBtn = document.getElementById("play")
   playBtn.addEventListener("click", togglePlay)
@@ -170,7 +194,7 @@ document.addEventListener("keydown", function(event) {
   event.preventDefault()
   if (event.code == "Space" ) {
     if (hero.y == 400) {
-      hero.ay = -20
+      hero.accelerationY = -20
       enemyStates = enemyStates.slice(0, index)
       heroStates = heroStates.slice(0, index)
     }
