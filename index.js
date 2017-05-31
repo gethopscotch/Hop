@@ -1,9 +1,6 @@
-var hopGrammar = ohm.grammarFromScriptElement()
 var imagesAvailable = [
-  "monkey.png",
-  "bear.png",
-  "icon.png",
-  "octo.png"
+  "square.png",
+  "triangle.png",
 ]
 
 var PIXIDisplayObject = {
@@ -50,8 +47,8 @@ function Hop(hopObject) {
   this.children = []
   if (!!hopObject.image) {
     var sprite = PIXI.Sprite.fromImage(hopObject.image);
-    sprite.scale.x = 0.2
-    sprite.scale.y = 0.2
+    sprite.scale.x = 0.5
+    sprite.scale.y = 0.5
     this.pixiDisplay.addChild(sprite)
   }
 
@@ -59,27 +56,6 @@ function Hop(hopObject) {
     this.pixiDisplay.addChild(hopObject.texture)
   }
 }
-
-
-var Shapes = {}
-
-var rectangle = new PIXI.Graphics()
-
-var padding = 10
-var style = {fontFamily: "Avenir", align: 'center'}
-var text = new PIXI.Text("pulse", style)
-text.x = padding
-text.y = padding
-
-rectangle.interactive = true;
-rectangle.lineStyle(0);
-rectangle.beginFill(0xFFFF0B, 0.5);
-rectangle.drawRect(0, 0, text.width + 2 * padding, text.height + 2 * padding);
-rectangle.endFill();
-rectangle.addChild(text)
-
-
-Shapes.rectangle = rectangle
 
 
 
@@ -116,6 +92,87 @@ function newHop(hopObject) {
   return hop
 }
 
+var hero = new PIXI.Graphics()
+hero.ay = 0
+hero.vy = 0
+var enemy = new PIXI.Graphics()
+enemy.vx = -5
+
+var onStart = function() {
+
+  hero.interactive = true;
+  hero.lineStyle(0);
+  hero.beginFill(0xFFFF0B, 0.5);
+  hero.drawRect(0, 0, 90, 90)
+  hero.endFill();
+  hero.x = 100
+  hero.y = 400
+
+  app.stage.addChild(hero)
+
+  enemy.lineStyle(0)
+  enemy.beginFill(0xF6A623, 1.0)
+  enemy.drawCircle(30, 60, 30)
+  enemy.endFill()
+  enemy.x = 400
+  enemy.y = hero.y
+  app.stage.addChild(enemy)
+}
+
+function boxesIntersect(sprite1, sprite2) {
+  var b1 = sprite1.getBounds()
+  var b2 = sprite2.getBounds()
+  b1.maxX = b1.x + b1.width
+  b2.maxX = b2.x + b2.width
+  b1.maxY = b1.y + b1.height
+  b2.maxY = b2.y + b2.height
+  var verticalOverlap = (b2.y <= b1.maxY && b1.maxY <= b2.maxY) ||
+    (b2.y <= b1.y && b1.y <= b2.maxY) ||
+    (b1.y <= b2.y && b2.y <= b1.maxY) ||
+    (b1.y <= b2.y && b2.y <= b1.maxY)
+  var horizontalOverlap = (b2.x <= b1.maxX && b1.maxX <= b2.maxX) ||
+    (b2.x <= b1.x && b1.x <= b2.maxX) ||
+    (b1.x <= b2.x && b2.x <= b1.maxX) ||
+    (b1.x <= b2.x && b2.x <= b1.maxX)
+  return verticalOverlap && horizontalOverlap
+}
+
+function onTick() {
+  enemy.x += enemy.vx
+  if (enemy.x < 0) {
+    enemy.x = 800 + Math.floor(Math.random() * 400)
+  }
+  hero.vy = hero.vy + hero.ay
+  hero.y += hero.vy
+  if(hero.y == 400) {
+    hero.ay = 0
+    hero.vy = 0
+  } else if (hero.y >= 400) {
+    hero.ay = 0
+    hero.vy = 0
+    hero.y = 400
+  } else {
+    hero.ay = 1.0
+  }
+  if (boxesIntersect(hero, enemy)) {
+    hero.alpha = 0.4
+  } else {
+    hero.alpha = 1.0
+  }
+}
+
+
 document.addEventListener("DOMContentLoaded", function(event) {
   document.body.appendChild(app.view);
+  onStart()
+  app.ticker.add(onTick)
 });
+
+document.addEventListener("keydown", function(event) {
+  event.preventDefault()
+  if (event.code == "Space") {
+    if (hero.y == 400) {
+      hero.ay = -20
+    }
+  }
+})
