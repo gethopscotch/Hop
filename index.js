@@ -13,7 +13,8 @@ var exportProps = function() {
     velocityX: this.velocityX,
     velocityY: this.velocityY,
     ax: this.ax,
-    accelerationY: this.accelerationY
+    accelerationY: this.accelerationY,
+    colliding: this.isColliding
   }
 }
 
@@ -148,8 +149,12 @@ function onTick(forward, update) {
 
   if (boxesIntersect(hero, enemy)) {
     hero.tint = 0xD0011B
+    hero.isColliding = true
+    enemy.isColliding = true
   } else {
     hero.tint = 0x50E3C2
+    hero.isColliding = false
+    enemy.isColliding = false
   }
 
   if (update) {
