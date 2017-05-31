@@ -1,96 +1,6 @@
-var imagesAvailable = [
-  "square.png",
-  "triangle.png",
-]
-
-var PIXIDisplayObject = {
-  // {speed: speed}
-  rotate: function(parameters) {
-    var that = this
-    // Listen for rotate update
-    this.app.ticker.add(function(delta) {
-
-      // delta is 1 if running at 100% performance
-      // creates frame-independent tranformation
-      var rotationSpeed = 0.01
-      if (!!parameters.speed) {
-        rotationSpeed = parameters.speed
-      }
-
-      that.pixiDisplay.rotation += rotationSpeed * delta;
-    });
-  },
-  pulse: function() {
-    var that = this
-    if (that.sign === undefined || that.sign == undefined) {
-      that.sign = 1
-    }
-    // Listen for rotate update
-    this.app.ticker.add(function(delta) {
-      if (that.pixiDisplay.scale.x > 2) {
-        that.sign = -1
-      } else if (that.pixiDisplay.scale.x < 0) {
-        that.sign = 1
-      }
-      that.pixiDisplay.scale.x += 0.01 * delta * that.sign;
-      that.pixiDisplay.scale.y = that.pixiDisplay.scale.x
-    });
-  }
-}
-
-// hopObject = { image:  image, x: xPosition, y: yPosition}
-function Hop(hopObject) {
-  var pixiDisplay = new PIXI.Container()
-  pixiDisplay.x = hopObject.x
-  pixiDisplay.y = hopObject.y
-  this.pixiDisplay = pixiDisplay
-  this.children = []
-  if (!!hopObject.image) {
-    var sprite = PIXI.Sprite.fromImage(hopObject.image);
-    sprite.scale.x = 0.5
-    sprite.scale.y = 0.5
-    this.pixiDisplay.addChild(sprite)
-  }
-
-  if (!!hopObject.texture) {
-    this.pixiDisplay.addChild(hopObject.texture)
-  }
-}
-
-
-
-Hop.prototype = PIXIDisplayObject
-
-Hop.prototype.addChildren = function(children) {
-  for (var i = 0; i< children.length; i++) {
-    this.addHop(children[i])
-  }
-}
-
-Hop.prototype.addHop = function(hop) {
-  this.pixiDisplay.addChild(hop.pixiDisplay);
-  this.children.push(hop)
-};
-
-// hopObject = { image:  image, x: xPosition, y: yPosition}
-Hop.prototype.addNewHop = function(hopObject) {
-  var hop = new Hop(hopObject);
-  this.addHop(hop)
-  return hop
-}
 
 var app = new PIXI.Application(800, 600, {backgroundColor : 0x1099bb});
 PIXIDisplayObject.app = app
-
-function addHop(hop) {
-  app.stage.addChild(hop.pixiDisplay);
-}
-// hopObject = { image:  image, x: xPosition, y: yPosition}
-function newHop(hopObject) {
-  var hop = new Hop(hopObject);
-  addHop(hop)
-  return hop
-}
 
 var hero = new PIXI.Graphics()
 hero.ay = 0
@@ -98,11 +8,37 @@ hero.vy = 0
 var enemy = new PIXI.Graphics()
 enemy.vx = -5
 
+var exportProps = function() {
+  return {
+    x: this.x,
+    y: this.y,
+    vx: this.vx,
+    vy: this.vy,
+    ax: this.ax,
+    ay: this.ay
+  }
+}
+
+var loadProps = function(props) {
+  this.x = props.x
+  this.y = props.y
+  this.vx = props.vx
+  this.vy = props.vy
+  this.ax = props.ax
+  this.ay = props.ay
+}
+
+hero.exportProps = exportProps
+hero.loadProps = loadProps
+enemy.exportProps = exportProps
+enemy.loadProps = loadProps
+
 var onStart = function() {
 
   hero.interactive = true;
   hero.lineStyle(0);
-  hero.beginFill(0xFFFF0B, 0.5);
+  hero.beginFill(0xFFFFFF, 1);
+  hero.tint = 0x50E3C2
   hero.drawRect(0, 0, 90, 90)
   hero.endFill();
   hero.x = 100
@@ -137,7 +73,14 @@ function boxesIntersect(sprite1, sprite2) {
   return verticalOverlap && horizontalOverlap
 }
 
-function onTick() {
+var enemyStates = []
+var heroStates = []
+
+function onTick(forward) {
+  if (!forward) {
+    enemy.loadProps(enemyStates.pop())
+    hero.loadProps(heroStates.pop())
+  }
   enemy.x += enemy.vx
   if (enemy.x < 0) {
     enemy.x = 800 + Math.floor(Math.random() * 400)
@@ -152,12 +95,17 @@ function onTick() {
     hero.vy = 0
     hero.y = 400
   } else {
-    hero.ay = 1.0
+    hero.ay = 0.98
   }
   if (boxesIntersect(hero, enemy)) {
-    hero.alpha = 0.4
+    hero.tint = 0xD0011B
   } else {
-    hero.alpha = 1.0
+    hero.tint = 0x50E3C2
+  }
+
+  if (forward) {
+    enemyStates.append(enemy.exportProps())
+    heroStates.append(hero.exportProps())
   }
 }
 
@@ -165,7 +113,6 @@ function onTick() {
 document.addEventListener("DOMContentLoaded", function(event) {
   document.body.appendChild(app.view);
   onStart()
-  app.ticker.add(onTick)
 });
 
 document.addEventListener("keydown", function(event) {
@@ -174,5 +121,13 @@ document.addEventListener("keydown", function(event) {
     if (hero.y == 400) {
       hero.ay = -20
     }
+  }
+
+  if (event.code == "ArrowRight") {
+    onTick(true)
+  }
+
+  if (event.code == "ArrowLeft") {
+    onTick(false)
   }
 })
