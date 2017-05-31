@@ -1,6 +1,5 @@
 
 var app = new PIXI.Application(800, 600, {backgroundColor : 0x1099bb});
-PIXIDisplayObject.app = app
 
 var hero = new PIXI.Graphics()
 hero.ay = 0
@@ -76,43 +75,74 @@ function boxesIntersect(sprite1, sprite2) {
 var enemyStates = []
 var heroStates = []
 
-function onTick(forward) {
+function onTick(forward, update) {
+  if (!update && !shouldTick) {
+    return
+  }
   if (!forward) {
     enemy.loadProps(enemyStates.pop())
     hero.loadProps(heroStates.pop())
-  }
-  enemy.x += enemy.vx
-  if (enemy.x < 0) {
-    enemy.x = 800 + Math.floor(Math.random() * 400)
-  }
-  hero.vy = hero.vy + hero.ay
-  hero.y += hero.vy
-  if(hero.y == 400) {
-    hero.ay = 0
-    hero.vy = 0
-  } else if (hero.y >= 400) {
-    hero.ay = 0
-    hero.vy = 0
-    hero.y = 400
+    enemy.loadProps(enemyStates.pop())
+    hero.loadProps(heroStates.pop())
   } else {
-    hero.ay = 0.98
+    enemy.x += enemy.vx
+    if (enemy.x < 0) {
+      enemy.x = 800 + Math.floor(Math.random() * 400)
+    }
+    hero.vy = hero.vy + hero.ay
+    hero.y += hero.vy
+    if(hero.y == 400) {
+      hero.ay = 0
+      hero.vy = 0
+    } else if (hero.y >= 400) {
+      hero.ay = 0
+      hero.vy = 0
+      hero.y = 400
+    } else {
+      hero.ay = 0.98
+    }
+    enemyStates.append(enemy.exportProps())
+    heroStates.append(hero.exportProps())
   }
+
   if (boxesIntersect(hero, enemy)) {
     hero.tint = 0xD0011B
   } else {
     hero.tint = 0x50E3C2
   }
 
-  if (forward) {
-    enemyStates.append(enemy.exportProps())
-    heroStates.append(hero.exportProps())
+  document.getElementById('info').innerHTML = "enemy: " + JSON.stringify(enemy.exportProps()) + "<br /> hero: " + JSON.stringify(hero.exportProps())
+  if (update) {
+    app.ticker.update()
+  }
+}
+
+var shouldTick = true
+function togglePlay(event) {
+  if (shouldTick) {
+    event.target.innerHTML = "Play"
+    shouldTick = false
+  } else {
+    event.target.innerHTML = "Stop"
+    shouldTick = true
   }
 }
 
 
 document.addEventListener("DOMContentLoaded", function(event) {
   document.body.appendChild(app.view);
+
+  var playBtn = document.getElementById("play")
+  playBtn.addEventListener("click", togglePlay)
+  document.getElementById("forward").addEventListener("click", function(event) {
+    onTick(true, true)
+  });
+  document.getElementById("back").addEventListener("click", function(event) {
+    onTick(false, true)
+  });
+
   onStart()
+  app.ticker.add(function() { onTick(true, false) })
 });
 
 document.addEventListener("keydown", function(event) {
@@ -124,10 +154,11 @@ document.addEventListener("keydown", function(event) {
   }
 
   if (event.code == "ArrowRight") {
-    onTick(true)
+    onTick(true, true)
   }
 
   if (event.code == "ArrowLeft") {
-    onTick(false)
+    onTick(false,true)
   }
 })
+
