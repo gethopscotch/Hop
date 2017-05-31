@@ -1,3 +1,4 @@
+var hopGrammar = ohm.grammarFromScriptElement()
 var imagesAvailable = [
   "monkey.png",
   "bear.png",
@@ -53,7 +54,34 @@ function Hop(hopObject) {
     sprite.scale.y = 0.2
     this.pixiDisplay.addChild(sprite)
   }
+
+  if (!!hopObject.texture) {
+    this.pixiDisplay.addChild(hopObject.texture)
+  }
 }
+
+
+var Shapes = {}
+
+var rectangle = new PIXI.Graphics()
+
+var padding = 10
+var style = {fontFamily: "Avenir", align: 'center'}
+var text = new PIXI.Text("pulse", style)
+text.x = padding
+text.y = padding
+
+rectangle.interactive = true;
+rectangle.lineStyle(0);
+rectangle.beginFill(0xFFFF0B, 0.5);
+rectangle.drawRect(0, 0, text.width + 2 * padding, text.height + 2 * padding);
+rectangle.endFill();
+rectangle.addChild(text)
+
+
+Shapes.rectangle = rectangle
+
+
 
 Hop.prototype = PIXIDisplayObject
 
