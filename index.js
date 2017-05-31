@@ -81,7 +81,8 @@ function onTick(forward, update) {
     return
   }
 
-  if (update) {
+  var shouldMoveForward = (index >= enemyStates.length - 1 && forward)
+  if (update && !shouldMoveForward) {
     if (!forward) {
       index -= 1
       if (index < 0) {
@@ -97,6 +98,7 @@ function onTick(forward, update) {
     enemy.loadProps(enemyStates[index])
     hero.loadProps(heroStates[index])
   } else {
+  
     enemy.x += enemy.vx
     if (enemy.x < 0) {
       enemy.x = 800 + Math.floor(Math.random() * 400)
@@ -166,9 +168,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
 document.addEventListener("keydown", function(event) {
   event.preventDefault()
-  if (event.code == "Space" && shouldTick) {
+  if (event.code == "Space" ) {
     if (hero.y == 400) {
       hero.ay = -20
+      enemyStates = enemyStates.slice(0, index)
+      heroStates = heroStates.slice(0, index)
     }
   }
 
