@@ -79,7 +79,7 @@ function updateDisplay(enemy, hero) {
   message = ""
 
   console.log(index)
-  for (var i = enemyStates.length - 1; i >= 0; i--) {
+  for (var i = enemyStates.length - 1; i >= enemyStates.length - 100; i--) {
     if (i == (index - 1)) {
       message += "<div id='activestate' style='background:red'>"
     }
