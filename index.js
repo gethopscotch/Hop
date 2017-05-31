@@ -126,7 +126,7 @@ function onTick(forward, update) {
     hero.tint = 0x50E3C2
   }
 
-  document.getElementById('messages').innerHTML = "enemy: " + JSON.stringify(enemy.exportProps()) + "<br /> hero: " + JSON.stringify(hero.exportProps())
+  // document.getElementById('messages').innerHTML = "enemy: " + JSON.stringify(enemy.exportProps()) + "<br /> hero: " + JSON.stringify(hero.exportProps())
   if (update) {
     app.ticker.update()
   }
