@@ -191,6 +191,17 @@ document.addEventListener("DOMContentLoaded", function(event) {
     onTick(false, true)
   });
 
+  document.getElementById("togglemessages").addEventListener("click", function(e) {
+    hidden = document.getElementById("messages").hidden
+    document.getElementById("messages").hidden = !hidden
+    if (hidden) {
+      e.target.innerHTML = "Hide messages"
+    } else {
+      e.target.innerHTML = "Show messages"
+    }
+
+  })
+
   onStart()
   app.ticker.add(function() { onTick(true, false) })
 });
