@@ -82,7 +82,7 @@ function updateDisplay(enemy, hero) {
   console.log(index)
   for (var i = enemyStates.length - 1; i >= enemyStates.length - 100; i--) {
     if (i == (index - 1)) {
-      message += "<div id='activestate' style='background:red'>"
+      message += "<div id='activestate' style='background:#F8E81C'>"
     }
     message += i + 1 + ") enemy: " + JSON.stringify(enemyStates[i]) 
     message += "<br /> hero: " + JSON.stringify(heroStates[i])
