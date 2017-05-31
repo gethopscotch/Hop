@@ -74,16 +74,28 @@ function boxesIntersect(sprite1, sprite2) {
 
 var enemyStates = []
 var heroStates = []
+var index = 0
 
 function onTick(forward, update) {
   if (!update && !shouldTick) {
     return
   }
-  if (!forward) {
-    enemy.loadProps(enemyStates.pop())
-    hero.loadProps(heroStates.pop())
-    enemy.loadProps(enemyStates.pop())
-    hero.loadProps(heroStates.pop())
+
+  if (update) {
+    if (!forward) {
+      index -= 1
+      if (index < 0) {
+        index = 0
+      }
+    } else {
+      index += 1
+      if (index >= enemyStates.length) {
+        index = enemyStates.length - 1
+      }
+    }
+
+    enemy.loadProps(enemyStates[index])
+    hero.loadProps(heroStates[index])
   } else {
     enemy.x += enemy.vx
     if (enemy.x < 0) {
@@ -101,6 +113,9 @@ function onTick(forward, update) {
     } else {
       hero.ay = 0.98
     }
+    enemyStates = enemyStates.slice(0, index)
+    heroStates = heroStates.slice(0, index)
+    index += 1
     enemyStates.append(enemy.exportProps())
     heroStates.append(hero.exportProps())
   }
@@ -111,7 +126,7 @@ function onTick(forward, update) {
     hero.tint = 0x50E3C2
   }
 
-  document.getElementById('info').innerHTML = "enemy: " + JSON.stringify(enemy.exportProps()) + "<br /> hero: " + JSON.stringify(hero.exportProps())
+  document.getElementById('messages').innerHTML = "enemy: " + JSON.stringify(enemy.exportProps()) + "<br /> hero: " + JSON.stringify(hero.exportProps())
   if (update) {
     app.ticker.update()
   }
@@ -120,10 +135,14 @@ function onTick(forward, update) {
 var shouldTick = true
 function togglePlay(event) {
   if (shouldTick) {
-    event.target.innerHTML = "Play"
+    document.getElementById('play').innerHTML = "Play"
+    document.getElementById('back').hidden = false
+    document.getElementById('forward').hidden = false
     shouldTick = false
   } else {
-    event.target.innerHTML = "Stop"
+    document.getElementById('play').innerHTML = "Stop"
+    document.getElementById('back').hidden = true
+    document.getElementById('forward').hidden = true
     shouldTick = true
   }
 }
@@ -147,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
 document.addEventListener("keydown", function(event) {
   event.preventDefault()
-  if (event.code == "Space") {
+  if (event.code == "Space" && shouldTick) {
     if (hero.y == 400) {
       hero.ay = -20
     }
@@ -160,5 +179,10 @@ document.addEventListener("keydown", function(event) {
   if (event.code == "ArrowLeft") {
     onTick(false,true)
   }
+
+  if(event.code == "Escape") {
+    togglePlay(event)
+  }
+
 })
 
