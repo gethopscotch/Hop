@@ -1,6 +1,8 @@
 var app = new PIXI.Application(800, 600, {backgroundColor : 0x1099bb});
 
 var hero = new PIXI.Graphics()
+hero.mass = 1
+hero.forceY = 0
 hero.accelerationY = 0
 hero.velocityY = 0
 var enemy = new PIXI.Graphics()
@@ -84,7 +86,7 @@ function updateDisplay(enemy, hero) {
     if (i == (index - 1)) {
       message += "<div id='activestate' style='background:#F8E81C'>"
     }
-    message += i + 1 + ") enemy: " + JSON.stringify(enemyStates[i]) 
+    message += i + 1 + ") enemy: " + JSON.stringify(enemyStates[i])
     message += "<br /> hero: " + JSON.stringify(heroStates[i])
     message += "<hr>"
     if (i == index - 1) {
@@ -94,6 +96,21 @@ function updateDisplay(enemy, hero) {
 
 
   document.getElementById('messages').innerHTML = message
+}
+
+hero.onTick = function() {
+  this.velocityY = this.velocityY + this.accelerationY
+  this.y += this.velocityY
+  if(this.y == 400) {
+    this.accelerationY = 0
+    this.velocityY = 0
+  } else if (this.y >= 400) {
+    this.accelerationY = 0
+    this.velocityY = 0
+    this.y = 400
+  } else {
+    this.accelerationY = 0.98
+  }
 }
 
 function onTick(forward, update) {
@@ -133,18 +150,7 @@ function onTick(forward, update) {
     if (enemy.x < 0) {
       enemy.x = 800 + Math.floor(Math.random() * 400)
     }
-    hero.velocityY = hero.velocityY + hero.accelerationY
-    hero.y += hero.velocityY
-    if(hero.y == 400) {
-      hero.accelerationY = 0
-      hero.velocityY = 0
-    } else if (hero.y >= 400) {
-      hero.accelerationY = 0
-      hero.velocityY = 0
-      hero.y = 400
-    } else {
-      hero.accelerationY = 0.98
-    }
+    hero.onTick()
   }
 
   if (boxesIntersect(hero, enemy)) {
@@ -229,4 +235,3 @@ document.addEventListener("keydown", function(event) {
   }
 
 })
-
